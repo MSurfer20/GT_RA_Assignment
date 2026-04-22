@@ -7,6 +7,8 @@ from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Uplo
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
+from .tasks import process_data_task
+
 from .database import Base, engine, get_db
 from .models import Task
 from .schemas import TaskResponse
