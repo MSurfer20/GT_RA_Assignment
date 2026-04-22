@@ -44,8 +44,7 @@ async def upload_dataset(payload_file: UploadFile = File(...), db_session: Sessi
     db_session.commit()
     db_session.refresh(new_task)
     
-    # TODO: We need to trigger the background processing here
-    # process_data_task.delay(task_id, dataset)
+    process_data_task.delay(uid, parsed_json)
     
     return new_task
 

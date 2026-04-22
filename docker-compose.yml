@@ -8,5 +8,25 @@ services:
     volumes:
       - ./backend:/app/backend
       - ./data:/app/data
+    depends_on:
+      - redis
     environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
       - DATABASE_URL=sqlite:////app/data/app.db
+
+  worker:
+    build: .
+    command: celery -A backend.celery_app.celery_app worker --loglevel=info
+    volumes:
+      - ./backend:/app/backend
+      - ./data:/app/data
+    depends_on:
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DATABASE_URL=sqlite:////app/data/app.db
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
