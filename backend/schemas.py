@@ -16,3 +16,13 @@ class TaskResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class TaskListResponse(BaseModel):
+    id: str
+    dataset_id: Optional[str] = None
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

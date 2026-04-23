@@ -11,7 +11,7 @@ from .tasks import process_data_task
 
 from .database import Base, engine, get_db
 from .models import Task
-from .schemas import TaskResponse
+from .schemas import TaskResponse, TaskListResponse
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -56,3 +56,8 @@ def get_task(task_id: str, db_session: Session = Depends(get_db)):
     if not record:
         raise HTTPException(status_code=404, detail="Task not found")
     return record
+
+@app.get("/api/tasks", response_model=List[TaskListResponse])
+def get_tasks(db: Session = Depends(get_db)):
+    tasks = db.query(Task).order_by(Task.created_at.desc()).all()
+    return tasks
