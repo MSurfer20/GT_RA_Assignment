@@ -81,7 +81,7 @@ async function showTask(taskId) {
                 <p><strong>Average Value:</strong> ${task.average_value}</p>
                 <p><strong>Invalid Records:</strong> ${task.invalid_records}</p>
                 <h4>Category Summary:</h4>
-                <pre>${JSON.stringify(t.category_summary, null, 2)}</pre>
+                <pre>${JSON.stringify(task.category_summary, null, 2)}</pre>
             `;
         } else if (task.status === 'Failed') {
             htmlContent += `<p><strong>Error Details:</strong> <span style="color: red;">${task.error_message}</span></p>`;
