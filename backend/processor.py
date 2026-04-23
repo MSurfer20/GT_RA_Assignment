@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 from typing import Dict, Any, Tuple
 
@@ -25,6 +26,9 @@ def process_dataset(data: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
             continue
             
         try:
+            # Check if timestamp is a valid ISO string
+            datetime.fromisoformat(str(r["timestamp"]))
+            
             val = float(r["value"])
             cat = str(r["category"])
             
