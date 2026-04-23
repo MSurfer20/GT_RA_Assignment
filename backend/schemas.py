@@ -13,6 +13,7 @@ class TaskResponse(BaseModel):
     category_summary: Optional[Dict[str, int]] = None
     average_value: Optional[float] = None
     invalid_records: Optional[int] = None
+    error_message: Optional[str] = None
     
     class Config:
         from_attributes = True

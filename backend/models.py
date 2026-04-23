@@ -20,3 +20,5 @@ class Task(Base):
     average_value = Column(Float, nullable=True)
     invalid_records = Column(Integer, nullable=True)
     
+    error_message = Column(String, nullable=True)
+    
