@@ -76,12 +76,12 @@ async function showTask(taskId) {
         if (task.status === 'Completed') {
             htmlContent += `
                 <hr/>
-                <h3>Processing Results</h3>
-                <p><strong>Total Records Processed:</strong> ${task.record_count}</p>
+                <h3>Results</h3>
+                <p><strong>Record Count:</strong> ${task.record_count}</p>
                 <p><strong>Average Value:</strong> ${task.average_value}</p>
-                <p><strong>Invalid Records Skipped:</strong> ${task.invalid_records}</p>
-                <h4>Category Breakdown:</h4>
-                <pre>${JSON.stringify(task.category_summary, null, 2)}</pre>
+                <p><strong>Invalid Records:</strong> ${task.invalid_records}</p>
+                <h4>Category Summary:</h4>
+                <pre>${JSON.stringify(t.category_summary, null, 2)}</pre>
             `;
         } else if (task.status === 'Failed') {
             htmlContent += `<p><strong>Error Details:</strong> <span style="color: red;">${task.error_message}</span></p>`;
