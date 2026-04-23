@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # The main FastAPI web server
   web:
     build: .
     ports:
@@ -8,12 +9,14 @@ services:
     volumes:
       - ./backend:/app/backend
       - ./data:/app/data
+      - ./frontend:/app/frontend
     depends_on:
       - redis
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - DATABASE_URL=sqlite:////app/data/app.db
 
+  # Background task worker using Celery
   worker:
     build: .
     command: celery -A backend.celery_app.app worker --loglevel=info
@@ -26,6 +29,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - DATABASE_URL=sqlite:////app/data/app.db
 
+  # Redis acts as the message broker between FastAPI and Celery
   redis:
     image: redis:7-alpine
     ports:
