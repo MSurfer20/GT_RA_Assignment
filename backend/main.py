@@ -37,6 +37,11 @@ async def upload_dataset(payload_file: UploadFile = File(...), db_session: Sessi
     try:
         raw_data = await payload_file.read()
         parsed_json = json.loads(raw_data)
+        
+        # Verify that the parsed JSON is actually a dictionary, not a list or primitive
+        if not isinstance(parsed_json, dict):
+            raise HTTPException(status_code=400, detail="JSON payload must be a dictionary")
+            
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON file")
 
