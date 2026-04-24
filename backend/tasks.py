@@ -6,6 +6,7 @@ from .models import Task
 from .processor import process_dataset
 import os
 import json
+import ijson
 
 log = logging.getLogger(__name__)
 
@@ -24,17 +25,24 @@ def process_data_task(self, t_id: str):
         
         file_path = f"data/{t_id}.json"
         
+        dataset_id = "unknown"
         try:
-            with open(file_path, "r") as f:
-                data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
+            with open(file_path, "rb") as f:
+                parser = ijson.parse(f)
+                for prefix, event, value in parser:
+                    if prefix == 'dataset_id':
+                        dataset_id = value
+                        break
+        except FileNotFoundError:
             raise ValueError("Failed to read JSON payload from disk")
+        except Exception:
+            pass # Invalid JSON or other error, handled later
             
-        current_task.dataset_id = data.get("dataset_id", "unknown")
+        current_task.dataset_id = dataset_id
         sess.commit()
         
         # run processing
-        res, ds_id = process_dataset(data)
+        res, ds_id = process_dataset(file_path)
         
         # save results
         current_task = sess.query(Task).filter(Task.id == t_id).first()

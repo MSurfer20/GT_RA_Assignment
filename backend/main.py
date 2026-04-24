@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+import shutil
+import ijson
 
 from .tasks import process_data_task
 from .database import Base, engine, get_db
@@ -29,35 +31,36 @@ app.add_middleware(
 )
 
 @app.post("/api/upload", response_model=TaskResponse)
-
-async def upload_dataset(payload_file: UploadFile = File(...), db_session: Session = Depends(get_db)):
+def upload_dataset(payload_file: UploadFile = File(...), db_session: Session = Depends(get_db)):
     if not payload_file.filename.endswith('.json'):
         raise HTTPException(status_code=400, detail="Only JSON files are supported")
         
-    try:
-        raw_data = await payload_file.read()
-        parsed_json = json.loads(raw_data)
-        
-        # Verify that the parsed JSON is actually a dictionary, not a list or primitive
-        if not isinstance(parsed_json, dict):
-            raise HTTPException(status_code=400, detail="JSON payload must be a dictionary")
-            
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Invalid JSON file")
-
     uid = str(uuid.uuid4())
-
+    file_path = f"data/{uid}.json"
+    
+    try:
+        # Stream the file directly to disk to prevent loading massive payloads into RAM
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(payload_file.file, buffer)
+            
+        dataset_id = "unknown"
+        # Extract dataset_id without loading the entire JSON
+        with open(file_path, "rb") as f:
+            parser = ijson.parse(f)
+            for prefix, event, value in parser:
+                if prefix == 'dataset_id':
+                    dataset_id = value
+                    break
+    except Exception as e:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(status_code=400, detail="Failed to process or parse JSON file")
 
     # Create the task record in the database
-    new_task = Task(id=uid, status="Pending", dataset_id=parsed_json.get("dataset_id"))
+    new_task = Task(id=uid, status="Pending", dataset_id=dataset_id)
     db_session.add(new_task)
     db_session.commit()
     db_session.refresh(new_task)
-
-    # Save the file to disk so we don't pass massive payloads through the Redis broker
-    file_path = f"data/{uid}.json"
-    with open(file_path, "w") as f:
-        json.dump(parsed_json, f)
 
     process_data_task.delay(uid)
     
