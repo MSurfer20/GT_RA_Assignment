@@ -54,7 +54,12 @@ async def upload_dataset(payload_file: UploadFile = File(...), db_session: Sessi
     db_session.commit()
     db_session.refresh(new_task)
 
-    process_data_task.delay(uid, parsed_json)
+    # Save the file to disk so we don't pass massive payloads through the Redis broker
+    file_path = f"data/{uid}.json"
+    with open(file_path, "w") as f:
+        json.dump(parsed_json, f)
+
+    process_data_task.delay(uid)
     
     return new_task
 

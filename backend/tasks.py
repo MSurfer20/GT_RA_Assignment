@@ -4,11 +4,13 @@ from .celery_app import app
 from .database import SessionLocal
 from .models import Task
 from .processor import process_dataset
+import os
+import json
 
 log = logging.getLogger(__name__)
 
 @app.task(bind=True)
-def process_data_task(self, t_id: str, data: Dict[str, Any]):
+def process_data_task(self, t_id: str):
     sess = SessionLocal()
     
     try:
@@ -18,6 +20,16 @@ def process_data_task(self, t_id: str, data: Dict[str, Any]):
             return
             
         current_task.status = "Processing"
+        sess.commit()
+        
+        file_path = f"data/{t_id}.json"
+        
+        try:
+            with open(file_path, "r") as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            raise ValueError("Failed to read JSON payload from disk")
+            
         current_task.dataset_id = data.get("dataset_id", "unknown")
         sess.commit()
         
@@ -46,4 +58,7 @@ def process_data_task(self, t_id: str, data: Dict[str, Any]):
             sess.commit()
         raise e
     finally:
+        # Clean up the file from disk after it has been processed
+        if os.path.exists(file_path):
+            os.remove(file_path)
         sess.close()
