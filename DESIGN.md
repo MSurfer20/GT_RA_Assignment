@@ -31,4 +31,10 @@ The system is built using a simple setup for handling tasks in the background:
 
 ### HTML+Vanilla JS
 
-**Why?** Since the assignment explicitly mentioned minimal frontend, I decided to not use any complex frameworks. Using a heavy framework would introduce a Node.js build step (Webpack/Vite), increasing complexity and Docker image size. Vanilla JS keeps the frontend lightweight and directly servable.
+**Why?** Since the assignment explicitly mentioned minimal frontend, I decided to not use any complex frameworks. Using a heavy framework would introduce a Node.js build step (Webpack/Vite), increasing complexity and Docker image size. Vanilla JS keeps the frontend lightweight and directly servable.*
+
+## An important design choice
+
+Rather than passing the entire JSON through Redis, increasing the memory consumption of the queue, I stored every uploaded file in `data/` directory and each worker independently parsed the file. This ensured that redis didn't run out of memory.
+
+**Assumption:** This assumes that the files are big enough to be opened in the web server. If the file is too big, then we would require `ijson` to parse it. However, I assume that the file is not that big.
