@@ -37,6 +37,7 @@ def process_data_task(self, t_id: str, data: Dict[str, Any]):
         return res
         
     except Exception as e:
+        sess.rollback()
         log.error(f"Failed task {t_id}: {str(e)}")
         current_task = sess.query(Task).filter(Task.id == t_id).first()
         if current_task:
