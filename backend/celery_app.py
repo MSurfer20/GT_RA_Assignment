@@ -7,7 +7,8 @@ app = Celery(
     "data_processor",
     broker=broker,
     backend=broker,
-    include=["backend.tasks"]
+    include=["backend.tasks"],
+    task_acks_late=True,
 )
 
 app.conf.update(
