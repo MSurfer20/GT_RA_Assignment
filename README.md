@@ -32,3 +32,6 @@ docker-compose down
 
 ## Design Choices
 Detailed design choices can be found in `DESIGN.md`.
+
+
+**Assumption:** This assumes that the files are big enough to be opened in the web server. If the file is too big, then we would require `ijson` to parse it. However, I assume that the file is not that big. The branch [large_size_file](https://github.com/MSurfer20/GT_RA_Assignment/tree/large_size_file) contains code to handle such files.
